@@ -7,7 +7,6 @@ import numpy as np
 import datetime
 import openpyxl as pyxl
 import tqdm
-import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -47,11 +46,10 @@ class TA(object):
         if not os.path.isdir(self.grade_report_directory):
             os.makedirs(self.grade_report_directory)
         self.log = open("/".join([base,item,"log.txt"]), "w+")
-        self.notes = open("/".join([base,item,"notes.txt"]), "w+")
 
     def get_solution_details(self,solutions):  
-        self.solutions_q_start = 17
-        self.solutions_points = solutions.iloc[14,2]
+        self.solutions_q_start = 20
+        self.solutions_points = solutions.iloc[15,2]
         return
         
     def open_solutions(self,file):
@@ -60,15 +58,12 @@ class TA(object):
             self.solutions = pyxl.load_workbook(filename=fname)
             self.solutions = pd.DataFrame(self.solutions["solutions"].values)
         else:
-            self.solutions = pd.read_excel(fname, sheetname="solutions", header=None)
+            self.solutions = pd.read_excel(fname, sheet_name="solutions", header=None)
             self.solutions.columns = list(string.ascii_uppercase)[:self.solutions.shape[1]]
             self.solutions = self.solutions.fillna(np.NaN)
         self.get_solution_details(self.solutions)
         return
     
-    def take_notes(self,text):
-        self.notes.write(text)
-
     def clean_submissions(self):
         for f in os.listdir(self.submissions_directory):
             if f.lower().endswith(".xlsx"):
@@ -85,7 +80,7 @@ class TA(object):
                 student.submission = pyxl.load_workbook(filename=fname)
                 student.submission = pd.DataFrame(file["submission"].values)
             else:
-                student.submission = pd.read_excel(fname, sheetname="submission",header=None) 
+                student.submission = pd.read_excel(fname, sheet_name="submission",header=None) 
         except xlrd.XLRDError as error:
             self.log.write("  Error when opening submission.\n")
             self.log.write("  Error: {} \n".format(str(error))) 
